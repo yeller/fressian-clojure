@@ -161,12 +161,15 @@
 (defn add-handlers
   "Add a sequence of handlers [[type tag writer reader] ...]"
   [list]
-  (swap! encode-handlers merge (map (fn [type tag writer _]
-                                      [type {tag writer}])
-                                    list))
   (swap! encode-handlers merge (into {}
-                                     (fn [_ tag _ reader]
-                                       [tag reader]))))
+                                     (map (fn [[type tag writer _]]
+                                            [type {tag writer}])
+                                          list)))
+  (swap! decode-handlers merge (into {}
+                                     (map (fn [[_ tag _ reader]]
+                                            [tag reader])
+                                          list))))
+                                     
 
 (defn clear-handlers
   "No special handlers"
