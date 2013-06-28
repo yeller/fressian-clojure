@@ -25,10 +25,7 @@ fressian options.
 This is a critical facility if you wish to retain the types of
 defrecords or deftype values during decoding.  For defrecords, the
 decoded result is a plain map.  See the file clojure.clj for examples
-of writers and readers and other methods of interest.  
-
-entity.clj has an example of custom encoding/decoding methods for
-datomic.
+of writers and readers and other methods of interest.
 
 ### Caveats
 
