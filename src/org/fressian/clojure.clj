@@ -113,15 +113,70 @@
   {clojure.lang.Keyword
    {"key"
     (reify WriteHandler (write [_ w s]
-                               (.writeTag w "key" 2)
-                               (.writeObject w (namespace s))
-                               (.writeObject w (name s))))}
+                          (.writeTag w "key" 2)
+                          (.writeObject w (namespace s))
+                          (.writeObject w (name s))))}
+
    clojure.lang.Symbol
    {"sym"
     (reify WriteHandler (write [_ w s]
-                               (.writeTag w "sym" 2)
-                               (.writeObject w (namespace s))
-                               (.writeObject w (name s))))}})
+                          (.writeTag w "sym" 2)
+                          (.writeObject w (namespace s))
+                          (.writeObject w (name s))))}
+
+   java.lang.Character
+   {"char"
+    (reify WriteHandler (write [_ w s]
+                          (.writeTag w "char" 1)
+                          (.writeInt w (int s))
+                          ))}
+   
+   clojure.lang.Ratio
+   {"ratio"
+    (reify WriteHandler (write [_ w s]
+                          (.writeTag w "ratio" 2)
+                          (.writeObject w (.numerator s))
+                          (.writeObject w (.denominator s))
+                          ))}
+
+   clojure.lang.BigInt
+   {"bigint"
+    (reify WriteHandler (write [_ w s]
+                          (.writeTag w "bigint" 1)
+                          (.writeBytes w (.. s toBigInteger toByteArray))))}
+
+   clojure.lang.PersistentVector
+   {"pvec"
+    (reify WriteHandler (write [_ w s]
+                          (.writeTag w "pvec" 1)
+                          (.writeList w s)))}
+
+   clojure.lang.PersistentList
+   {"plist"
+    (reify WriteHandler (write [_ w s]
+                          (.writeTag w "plist" 1)
+                          (.writeList w s)))}
+
+   clojure.lang.PersistentTreeMap
+   {"spmap"
+    (reify WriteHandler (write [_ w s]
+                          (.writeTag w "spmap" 1)
+                          (let [l (java.util.ArrayList.)]
+                            (doseq [[k v] s]
+                              (.add l k)
+                              (.add l v))
+                            (.writeList w l))))}
+
+   clojure.lang.PersistentTreeSet
+   {"spset"
+    (reify WriteHandler (write [_ w s]
+                          (.writeTag w "spset" 1)
+                          (.writeList w s)))}
+   
+   
+;;   clojure.lang.PersistentList
+;;   clojure.lang.PersistentQueue
+   })
 
 (def clojure-read-handlers
   {"key"
@@ -130,12 +185,45 @@
    "sym"
    (reify ReadHandler (read [_ rdr tag component-count]
                             (symbol (.readObject rdr) (.readObject rdr))))
+
+   "char"
+   (reify ReadHandler (read [_ rdr tag component-count]
+                            (char (.readInt rdr))))
+   
+   "ratio"
+   (reify ReadHandler (read [_ rdr tag component-count]
+                        (/ (.readObject rdr) (.readObject rdr))))
+   
    "map"
    (reify ReadHandler (read [_ rdr tag component-count]
-                            (let [kvs ^java.util.List (.readObject rdr)]
-                              (if (< (.size kvs) 16)
-                                (clojure.lang.PersistentArrayMap. (.toArray kvs))
-                                (clojure.lang.PersistentHashMap/create (seq kvs))))))})
+                        (let [kvs ^java.util.List (.readObject rdr)]
+                          (if (< (.size kvs) 16)
+                            (clojure.lang.PersistentArrayMap. (.toArray kvs))
+                            (clojure.lang.PersistentHashMap/create (seq kvs))))))
+   
+   "spmap"
+   (reify ReadHandler (read [_ rdr tag component-count]
+                        (let [kvs ^java.util.List (.readObject rdr)]
+                          (clojure.lang.PersistentTreeMap/create (seq kvs)))))
+
+   "spset"
+   (reify ReadHandler (read [_ rdr tag component-count]
+                        (let [kvs ^java.util.List (.readObject rdr)]
+                          (clojure.lang.PersistentTreeSet/create (seq kvs)))))
+   
+   "set"
+   (reify ReadHandler (read [_ rdr tag component-count]
+                        (let [s ^java.util.HashSet (.readObject rdr)]
+                          (set s))))
+
+   "pvec" 
+   (reify ReadHandler (read [_ rdr tag component-count]
+                        (vec (.readObject rdr))))
+
+   "plist" 
+   (reify ReadHandler (read [_ rdr tag component-count]
+                        (apply list (.readObject rdr))))
+   })
 
 (extend ByteBuffer
   io/IOFactory
@@ -194,8 +282,20 @@
                     :handlers (merge @encode-handlers (:handlers options)))))
                     
 
+(defmulti decode-as-clojure type)
+
+(defmethod decode-as-clojure :default [value]
+  value)
+
+(defmethod decode-as-clojure java.math.BigInteger [value]
+  (clojure.lang.BigInt/fromBigInteger value))
+
 (defn decode
   "Decode a byte array containing fressian clojure data"
   [bdata & options]
   (let [stream (ByteBufferInputStream. (ByteBuffer/wrap bdata))]
-    (defressian stream :handlers (merge @decode-handlers (:handlers options)))))
+    (-> (defressian stream :handlers (merge @decode-handlers (:handlers options)))
+        decode-as-clojure)))
+    
+
+

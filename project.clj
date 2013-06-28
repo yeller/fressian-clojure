@@ -1,4 +1,4 @@
-(defproject fressian-clojure "0.1.0"
+(defproject fressian-clojure "0.2.0"
   :description "Clojure wrapper for the Fressian library"
   :url "http://github.com/vitalreactor/fressian-clojure"
   :license {:name "Eclipse Public License"

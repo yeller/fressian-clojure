@@ -8,7 +8,7 @@ fressian options.
 
 ## Usage
 
-    :dependencies [fressian-clojure "0.1.0"]
+    :dependencies [fressian-clojure "0.2.0"]
 
     (:use [org.fressian.clojure :only [decode encode add-handler]])
 
@@ -22,7 +22,23 @@ fressian options.
 
     (fr/add-handler org.type.MyType "mytag" <writer> <reader>)
 
-See the file clojure.clj for examples of writers and readers and other methods of interest
+This is a critical facility if you wish to retain the types of
+defrecords or deftype values during decoding.  For defrecords, the
+decoded result is a plain map.  See the file clojure.clj for examples
+of writers and readers and other methods of interest.  
+
+entity.clj has an example of custom encoding/decoding methods for
+datomic.
+
+### Caveats
+
+- Should be reasonably efficient, but no guarantees about encoding/decoding optimality, especially for collection types
+- Default serializer handlers do not distinguish between array and hash maps
+- Records are deserialized as maps by default (see above)
+- Structs are always deserialized as maps
+- Collection metadata is ignored
+- Functions cannot be serialized
+- No support for persistent queues yet
 
 ## License
 
