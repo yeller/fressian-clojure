@@ -290,12 +290,14 @@
 (defmethod decode-as-clojure java.math.BigInteger [value]
   (clojure.lang.BigInt/fromBigInteger value))
 
+(defn decode-from
+  "Decode a single fressian object from input stream."
+  [stream & options]
+  (-> (defressian stream :handlers (merge @decode-handlers (:handlers options)))
+      decode-as-clojure))
+
 (defn decode
   "Decode a byte array containing fressian clojure data"
   [bdata & options]
   (let [stream (ByteBufferInputStream. (ByteBuffer/wrap bdata))]
-    (-> (defressian stream :handlers (merge @decode-handlers (:handlers options)))
-        decode-as-clojure)))
-    
-
-
+    (decode-from stream)))
