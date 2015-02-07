@@ -89,9 +89,9 @@
 (defn ^ByteBuffer byte-buf
   "Return a byte buffer with the fressianed form of object.
    See fressian for options."
-  [obj & options]
+  [obj & {:keys [handlers footer]}]
   (let [baos (BytesOutputStream.)]
-    (apply fressian baos obj options)
+    (fressian baos obj :handlers handlers :footer footer)
     (bytestream->buf baos)))
 
 (defn read-batch
