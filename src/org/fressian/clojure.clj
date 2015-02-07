@@ -130,7 +130,7 @@
                           (.writeTag w "char" 1)
                           (.writeInt w (int s))
                           ))}
-   
+
    clojure.lang.Ratio
    {"ratio"
     (reify WriteHandler (write [_ w s]
@@ -174,8 +174,8 @@
     (reify WriteHandler (write [_ w s]
                           (.writeTag w "spset" 1)
                           (.writeList w s)))}
-   
-   
+
+
 ;;   clojure.lang.PersistentList
 ;;   clojure.lang.PersistentQueue
    })
@@ -191,18 +191,18 @@
    "char"
    (reify ReadHandler (read [_ rdr tag component-count]
                             (char (.readInt rdr))))
-   
+
    "ratio"
    (reify ReadHandler (read [_ rdr tag component-count]
                         (/ (.readObject rdr) (.readObject rdr))))
-   
+
    "map"
    (reify ReadHandler (read [_ rdr tag component-count]
                         (let [kvs ^java.util.List (.readObject rdr)]
                           (if (< (.size kvs) 16)
                             (clojure.lang.PersistentArrayMap. (.toArray kvs))
                             (clojure.lang.PersistentHashMap/create (seq kvs))))))
-   
+
    "spmap"
    (reify ReadHandler (read [_ rdr tag component-count]
                         (let [kvs ^java.util.List (.readObject rdr)]
@@ -212,17 +212,17 @@
    (reify ReadHandler (read [_ rdr tag component-count]
                         (let [kvs ^java.util.List (.readObject rdr)]
                           (clojure.lang.PersistentTreeSet/create (seq kvs)))))
-   
+
    "set"
    (reify ReadHandler (read [_ rdr tag component-count]
                         (let [s ^java.util.HashSet (.readObject rdr)]
                           (set s))))
 
-   "pvec" 
+   "pvec"
    (reify ReadHandler (read [_ rdr tag component-count]
                         (vec (.readObject rdr))))
 
-   "plist" 
+   "plist"
    (reify ReadHandler (read [_ rdr tag component-count]
                         (apply list (.readObject rdr))))
    })
@@ -259,7 +259,7 @@
                                      (map (fn [[_ tag _ reader]]
                                             [tag reader])
                                           list))))
-                                     
+
 
 (defn clear-handlers
   "No special handlers"
@@ -282,7 +282,7 @@
   [cdata & options]
   (.array (byte-buf cdata
                     :handlers (merge @encode-handlers (:handlers options)))))
-                    
+
 
 (defmulti decode-as-clojure type)
 
