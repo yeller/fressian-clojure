@@ -3,6 +3,7 @@
   :url "http://github.com/vitalreactor/fressian-clojure"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
+  :global-vars {*warn-on-reflection* true}
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.fressian/fressian "0.6.2"]])
 
