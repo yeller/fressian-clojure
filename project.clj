@@ -1,4 +1,4 @@
-(defproject yeller/fressian-clojure "0.3.0"
+(defproject yeller/fressian-clojure "0.3.1-SNAPSHOT"
   :description "Clojure wrapper for the Fressian library"
   :url "http://github.com/yeller/fressian-clojure"
   :license {:name "Eclipse Public License"
