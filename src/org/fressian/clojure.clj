@@ -134,16 +134,18 @@
    clojure.lang.Ratio
    {"ratio"
     (reify WriteHandler (write [_ w s]
-                          (.writeTag w "ratio" 2)
-                          (.writeObject w (.numerator s))
-                          (.writeObject w (.denominator s))
+                          (let [^clojure.lang.Ratio r s]
+                            (.writeTag w "ratio" 2)
+                            (.writeObject w (.numerator r))
+                            (.writeObject w (.denominator r)))
                           ))}
 
    clojure.lang.BigInt
    {"bigint"
     (reify WriteHandler (write [_ w s]
-                          (.writeTag w "bigint" 1)
-                          (.writeBytes w (.. s toBigInteger toByteArray))))}
+                          (let [^clojure.lang.BigInt i s]
+                            (.writeTag w "bigint" 1)
+                            (.writeBytes w (.. i toBigInteger toByteArray)))))}
 
    clojure.lang.PersistentVector
    {"pvec"
