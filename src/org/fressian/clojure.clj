@@ -278,7 +278,7 @@
 ;;
 
 (defn faster-merge [m1 m2]
-  (if (seq m2)
+  (if m2
     (merge m1 m2)
     m1))
 
