@@ -277,11 +277,16 @@
 ;; Simple API for byte[]
 ;;
 
+(defn faster-merge [m1 m2]
+  (if (seq m2)
+    (merge m1 m2)
+    m1))
+
 (defn encode
   "Encode clojure data in a byte[]"
   [cdata & options]
   (.array (byte-buf cdata
-                    :handlers (merge @encode-handlers (:handlers options)))))
+                    :handlers (faster-merge @encode-handlers (:handlers options)))))
 
 
 (defmulti decode-as-clojure type)
@@ -295,7 +300,7 @@
 (defn decode-from
   "Decode a single fressian object from input stream."
   [stream & options]
-  (-> (defressian stream :handlers (merge @decode-handlers (:handlers options)))
+  (-> (defressian stream :handlers (faster-merge @decode-handlers (:handlers options)))
       decode-as-clojure))
 
 (defn decode
